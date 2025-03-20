@@ -37,13 +37,13 @@ async function checkInventory() {
       WITH StandbyInventory AS (
           SELECT ITMNO, WARHS AS LINE, SUM(JQTY) AS 스탠바이재고 
           FROM SAG.dbo.MAT_ITMBLPFSUB 
-          WHERE WARHS IN ('F01', 'R01', 'C01') AND JQTY > 0
+          WHERE WARHS IN ('F01', 'R01', 'C01', 'F31') AND JQTY > 0
           GROUP BY ITMNO, WARHS
       ),
       LotInInventory AS (
           SELECT LINE, ITMNO, SUM(J_QTY) AS 로뜨인재고
           FROM SAG.dbo.PRD_LOTIN 
-          WHERE LINE IN ('F01', 'R01', 'C01') AND J_QTY > 0
+          WHERE LINE IN ('F01', 'R01', 'C01', 'F31') AND J_QTY > 0
           GROUP BY ITMNO, LINE
       ),
       TotalInventory AS (
@@ -63,13 +63,13 @@ async function checkInventory() {
               p.RDATE, 
               p.WRK_CD AS LINE,  
               b.CITEM AS ITMNO,  
-              SUM(p.PL_QTY * b.[USAGE]) AS 일일_소재기준_필요수량,  
-              SUM(p.RH_QTY * b.[USAGE]) AS 일일_소재기준_사용수량  
+              SUM(p.PL_QTY * b.[QTY]) AS 일일_소재기준_필요수량,  
+              SUM(p.RH_QTY * b.[QTY]) AS 일일_소재기준_사용수량  
           FROM SAG.dbo.PRD_PRDPDPF p  
-          JOIN SAG.dbo.BAS_BOMSTPF b  
+          JOIN SAG.dbo.BAS_BOM_JORIP b  
               ON p.ITMNO = b.ITMNO
           WHERE p.RDATE = CONVERT(VARCHAR(8), GETDATE(), 112) 
-            AND p.WRK_CD IN ('F01', 'R01', 'C01')
+            AND p.WRK_CD IN ('F01', 'R01', 'C01', 'F31')
           GROUP BY p.RDATE, p.WRK_CD, b.CITEM
       )
       SELECT 
