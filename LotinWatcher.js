@@ -114,15 +114,13 @@ async function checkInventory() {
       const pendingItems = result.recordset.filter(row => row.WRKSTS === "PENDING");
       if (pendingItems.length > 0) {
         message += "🔹 *다음 작업 예정*\n";
+        message += "```품번         라인 작업순번 부족\n";
         pendingItems.forEach(row => {
-          message += `📦 *품번:* ${row.품번} (${row.품명})\n`;
-          message += `🏭 *라인:* ${row.라인} (${row.ITMNO})\n`;
-          message += `🏭 *작업순번:* ${row.작업순번}\n`;
-          message += `📊 *현재 수량:* ${row.현재수량}\n`;
-          message += `📉 *필요 수량:* ${row.필요수량}\n`;
-          message += `⚠️ *부족 수량:* ${row.부족수량}\n\n`;
+          message += `${row.품번.padEnd(10)} ${row.라인.padEnd(5)} ${String(row.작업순번).padEnd(3)} ${String(row.부족수량).padEnd(3)}\n`;
         });
+        message += "```\n";
       }
+
 
       await sendSlackAlert(message);
     } else {
